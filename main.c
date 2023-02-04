@@ -12,15 +12,21 @@
 #include "st7735.h"
 #include "fonts.h"
 
-#define SHELL_WA_SIZE   THD_WORKING_AREA_SIZE(2048)
-
 void test_tft(void);
+void screen1(void);
 
+typedef struct {
+  uint16_t rpm;
+  uint16_t afr; //14.70 = 1470
+}tstVehData;
+
+
+tstVehData vData;
 
 /*
  * Alive indicator led.
  */
-static THD_WORKING_AREA(waThread1, 128);
+static THD_WORKING_AREA(waThread1, 256);
 static THD_FUNCTION(Thread1, arg) {
 
   
@@ -28,40 +34,31 @@ static THD_FUNCTION(Thread1, arg) {
   chRegSetThreadName("blinker");
   setLED();
 
-  ST7735_WriteString(0,0,"HELLO",Font_16x26,ST7735_GREEN,ST7735_BLACK);
-
-
+  ST7735_FillScreen(ST7735_BLACK);
+  
   while (true) {
-    //clrLED();
-    //chThdSleepMilliseconds(300);
-    //chThdSleepMilliseconds(700);
-    test_tft();
-    ST7735_FillScreen(ST7735_BLACK);
+    //test_tft();
+    screen1();
     toggleLED();
-    chThdSleepMilliseconds(1000);
-    ST7735_FillScreen(ST7735_BLUE);
-    toggleLED();
-    chThdSleepMilliseconds(1000);
-    ST7735_FillScreen(ST7735_RED);
-    toggleLED();
-    chThdSleepMilliseconds(1000);
-    ST7735_FillScreen(ST7735_GREEN);
-    toggleLED();
-    chThdSleepMilliseconds(1000);
-    ST7735_FillScreen(ST7735_CYAN);
-    toggleLED();
-    chThdSleepMilliseconds(1000);
-    ST7735_FillScreen(ST7735_MAGENTA);
-    toggleLED();
-    chThdSleepMilliseconds(1000);
-    ST7735_FillScreen(ST7735_YELLOW);
-    toggleLED();
-    chThdSleepMilliseconds(1000);
-    ST7735_FillScreen(ST7735_WHITE);
-    toggleLED();
-    chThdSleepMilliseconds(500);
+    chThdSleepMilliseconds(200);
 
   }
+}
+
+
+static THD_WORKING_AREA(waThread2, 128);
+static THD_FUNCTION(Thread2, arg) {
+    (void)arg;
+    chRegSetThreadName("dUpdater");
+
+    while(true) {
+      chThdSleepMilliseconds(500);
+      vData.rpm += 100;
+      if (vData.rpm > 7000) { vData.rpm = 800; }
+
+      vData.afr += 10;
+      if (vData.afr > 1700) { vData.afr = 1310; }
+    }
 }
 
 /*
@@ -88,6 +85,8 @@ int main(void) {
   /*  */
   ST7735_Init();
   tft_Led(LED_FULL);
+  vData.rpm = 0;
+  vData.afr = 1470;
 
   //ST7735_FillScreenFast(ST7735_BLACK);
 
@@ -105,6 +104,7 @@ int main(void) {
    * Creates the blinker thread.
    */
   chThdCreateStatic(waThread1, sizeof(waThread1), HIGHPRIO, Thread1, NULL);
+  chThdCreateStatic(waThread2, sizeof(waThread2), NORMALPRIO, Thread2, NULL);
 
   /*
    * Normal main() thread activity, in this demo it does nothing except
@@ -116,63 +116,16 @@ int main(void) {
   }
 }
 
-
-
-void test_tft(void) {
-    // Check border
-    ST7735_FillScreen(ST7735_BLACK);
-    chThdSleepMilliseconds(100);
-
-    for(int x = 0; x < ST7735_WIDTH; x++) {
-        ST7735_DrawPixel(x, 0, ST7735_RED);
-        ST7735_DrawPixel(x, ST7735_HEIGHT-1, ST7735_RED);
-    }
-
-    for(int y = 0; y < ST7735_HEIGHT; y++) {
-        ST7735_DrawPixel(0, y, ST7735_RED);
-        ST7735_DrawPixel(ST7735_WIDTH-1, y, ST7735_RED);
-    }
-
-    chThdSleepMilliseconds(100);
-
-    // Check fonts
-    ST7735_FillScreen(ST7735_BLACK);
-    ST7735_WriteString(0, 0, "Font_7x10, red on black, lorem ipsum dolor sit amet", Font_7x10, ST7735_RED, ST7735_BLACK);
-    ST7735_WriteString(0, 3*10, "Font_11x18, green, lorem ipsum", Font_11x18, ST7735_GREEN, ST7735_BLACK);
-    ST7735_WriteString(0, 3*10+3*18, "Font_16x26", Font_16x26, ST7735_BLUE, ST7735_BLACK);
-    chThdSleepMilliseconds(2000);
-
-// Check colors
-    ST7735_FillScreen(ST7735_BLACK);
-    ST7735_WriteString(0, 0, "BLACK", Font_11x18, ST7735_WHITE, ST7735_BLACK);
-    chThdSleepMilliseconds(500);
-
-    ST7735_FillScreen(ST7735_BLUE);
-    ST7735_WriteString(0, 0, "BLUE", Font_11x18, ST7735_BLACK, ST7735_BLUE);
-    chThdSleepMilliseconds(500);
-
-    ST7735_FillScreen(ST7735_RED);
-    ST7735_WriteString(0, 0, "RED", Font_11x18, ST7735_BLACK, ST7735_RED);
-    chThdSleepMilliseconds(500);
-
-    ST7735_FillScreen(ST7735_GREEN);
-    ST7735_WriteString(0, 0, "GREEN", Font_11x18, ST7735_BLACK, ST7735_GREEN);
-    chThdSleepMilliseconds(500);
-
-    ST7735_FillScreen(ST7735_CYAN);
-    ST7735_WriteString(0, 0, "CYAN", Font_11x18, ST7735_BLACK, ST7735_CYAN);
-    chThdSleepMilliseconds(500);
-
-    ST7735_FillScreen(ST7735_MAGENTA);
-    ST7735_WriteString(0, 0, "MAGENTA", Font_11x18, ST7735_BLACK, ST7735_MAGENTA);
-    chThdSleepMilliseconds(500);
-
-    ST7735_FillScreen(ST7735_YELLOW);
-    ST7735_WriteString(0, 0, "YELLOW", Font_11x18, ST7735_BLACK, ST7735_YELLOW);
-    chThdSleepMilliseconds(500);
-
-    ST7735_FillScreen(ST7735_WHITE);
-    ST7735_WriteString(0, 0, "WHITE", Font_11x18, ST7735_BLACK, ST7735_WHITE);
-    chThdSleepMilliseconds(500);
-
+void screen1(void)
+{
+    //ST7735_WriteString(0, 0, "Font_7x10, red on black, lorem ipsum dolor sit amet", Font_7x10, ST7735_RED, ST7735_BLACK);
+    static char val[20];
+    ST7735_WriteString(0, 0, "RPM: ", Font_11x18, ST7735_GREEN, ST7735_BLACK);
+    //bzero(val,20);
+    //sprintf(val,"%d",vData.rpm);
+    ST7735_WriteString(11*5, 0, "850", Font_11x18, ST7735_GREEN, ST7735_BLACK);
+    ST7735_WriteString(0, 18, "AFR: ", Font_11x18, ST7735_GREEN, ST7735_BLACK);
+    //sprintf(val,"%d.%d",(vData.afr / 100),(vData.afr%100));
+    //val[5] = '\0';
+    ST7735_WriteString(11*5, 18, "14.40", Font_11x18, ST7735_GREEN, ST7735_BLACK);
 }
