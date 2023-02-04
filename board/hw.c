@@ -20,76 +20,83 @@ static const SPIConfig ls_spicfg = {
 
     GPIOA,      /* ssport */
     4U,         /* sspad */
-    SPI_CR1_BR_0 | SPI_CR1_BR_1,   /* spi_lld_config_fields */
+    SPI_CR1_BR_0 ,/*| SPI_CR1_BR_1, */  /* spi_lld_config_fields */ //-> 5Mhz
     0
   };
 
 
 void initTFTSPI(void) 
 {
-    palSetPadMode(IOPORT1, 5, PAL_MODE_STM32_ALTERNATE_PUSHPULL);     /* SCK. */
-    palSetPadMode(IOPORT1, 6, PAL_MODE_STM32_ALTERNATE_PUSHPULL);     /* MISO.*/
-    palSetPadMode(IOPORT1, 7, PAL_MODE_STM32_ALTERNATE_PUSHPULL);     /* MOSI.*/
-    //palSetPadMode(IOPORT1, 4, PAL_MODE_OUTPUT_PUSHPULL);
-    //palSetPad(IOPORT1, 4);
+    palSetPadMode(PORT_SPI1_SCK,  PIN_SPI1_SCK,  PAL_MODE_STM32_ALTERNATE_PUSHPULL);     /* SCK. */
+    palSetPadMode(PORT_SPI1_MISO, PIN_SPI1_MISO, PAL_MODE_STM32_ALTERNATE_PUSHPULL);     /* MISO.*/
+    palSetPadMode(PORT_SPI1_MOSI, PIN_SPI1_MOSI, PAL_MODE_STM32_ALTERNATE_PUSHPULL);     /* MOSI.*/
+    palSetPadMode(PORT_SPI1_CS,   PIN_SPI1_CS,   PAL_MODE_STM32_ALTERNATE_PUSHPULL);
+    palSetPadMode(ST7735_DC_GPIO_Port,  ST7735_DC_Pin,  PAL_MODE_OUTPUT_PUSHPULL);
+    palSetPadMode(ST7735_RES_GPIO_Port, ST7735_RES_Pin, PAL_MODE_OUTPUT_PUSHPULL);
+    palSetPad(ST7735_RES_GPIO_Port, ST7735_RES_Pin);
+    
     spiStart(&SPID1, &ls_spicfg); 
-
-    //LED on
-    palClearPad(GPIOB, 1U);
 }
 
 void tft_spi_csh(void)
 {
-  //HAL_GPIO_WritePin(ST7735_CS_GPIO_Port, ST7735_CS_Pin, GPIO_PIN_SET);
-  //spiUnselect(&SPID1);                  /* Slave Select assertion.          */
-  palSetPad(GPIOB,0U);
-  //spiUnselectI(&SPID1);
+  //palSetPad(ST7735_CS_GPIO_Port,ST7735_CS_Pin);
+  spiUnselect(&SPID1);
 }
 
 void tft_spi_csl(void)
 {
-  //HAL_GPIO_WritePin(ST7735_CS_GPIO_Port, ST7735_CS_Pin, GPIO_PIN_RESET);
-  //spiSelect(&SPID1);                /* Slave Select de-assertion.       */
-  palClearPad(GPIOB,0U);
-  //spiSelectI(&SPID1);
+  //palClearPad(ST7735_CS_GPIO_Port,ST7735_CS_Pin);
+  spiSelect(&SPID1);
 }
 
 void tft_reset(void)
 {
-    //HAL_GPIO_WritePin(ST7735_RES_GPIO_Port, ST7735_RES_Pin, GPIO_PIN_RESET);
-    //HAL_Delay(5);
     palClearPad(ST7735_RES_GPIO_Port, ST7735_RES_Pin);
-    chThdSleepMilliseconds(100);
+    chThdSleepMilliseconds(50);
     palSetPad(ST7735_RES_GPIO_Port, ST7735_RES_Pin);
     chThdSleepMilliseconds(1);
-    //HAL_GPIO_WritePin(ST7735_RES_GPIO_Port, ST7735_RES_Pin, GPIO_PIN_SET);
 }
 void tft_spi_xfer_byte(unsigned char *data, unsigned char len)
 {
-  //static uint8_t txbuf[64];
-  //static uint8_t rxbuf[64];
-  //for (unsigned char i=0; i< len; i++) {
-  //  txbuf[i] = *data;
-  //  data++;
- // }
   spiStartSend(&SPID1, len, data);
-  chThdSleepMilliseconds(10);
-  //spiExchange(&SPID1,len,txbuf, rxbuf); 
-  //(void)rxbuf;
+  chThdSleepMicroseconds(1);
+}
+
+void tft_spiSend(const void *txbuf, size_t n)
+{
+  spiStartSend(&SPID1, n, txbuf);
+  chThdSleepMicroseconds(1);  
 }
 
 void tft_setData(void) 
 {
-    //HAL_GPIO_WritePin(ST7735_DC_GPIO_Port, ST7735_DC_Pin, GPIO_PIN_SET);
     palSetPad(ST7735_DC_GPIO_Port, ST7735_DC_Pin);
-    chThdSleepMilliseconds(1);
+    chThdSleepMicroseconds(1);
 }
 
 void tft_setCmd(void)
 {
-    //HAL_GPIO_WritePin(ST7735_DC_GPIO_Port, ST7735_DC_Pin, GPIO_PIN_RESET);
     palClearPad(ST7735_DC_GPIO_Port, ST7735_DC_Pin);
-    chThdSleepMilliseconds(1);
+    chThdSleepMicroseconds(1);
+}
+
+void tft_Led(uint8_t val)
+{
+  if (val == LED_FULL) {
+
+    palSetPadMode(ST7735_LED_PORT, ST7735_LED_Pin, PAL_MODE_OUTPUT_PUSHPULL);
+    palSetPad(ST7735_LED_PORT, ST7735_LED_Pin);
+
+  } else if (val == LED_OFF){
+
+    palSetPadMode(ST7735_LED_PORT, ST7735_LED_Pin, PAL_MODE_OUTPUT_PUSHPULL);
+    palClearPad(ST7735_LED_PORT, ST7735_LED_Pin);
+
+  } else {
+
+  }
+
 }
 
 void initLED(void)
@@ -99,10 +106,15 @@ void initLED(void)
 
 void setLED(void)
 {
-    //palSetPad(GPIO_LED, GPIOPin_LED);
+    palSetPad(GPIO_LED, GPIOPin_LED);
 }
 
 void clrLED(void)
 {
-   // palClearPad(GPIO_LED, GPIOPin_LED);
+   palClearPad(GPIO_LED, GPIOPin_LED);
+}
+
+void toggleLED(void)
+{
+  palTogglePad(GPIO_LED, GPIOPin_LED);
 }

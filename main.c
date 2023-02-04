@@ -26,14 +26,42 @@ static THD_FUNCTION(Thread1, arg) {
 
   (void)arg;
   chRegSetThreadName("blinker");
+  setLED();
+
+  ST7735_FillScreen(ST7735_BLACK);
+  ST7735_WriteString(0,0,"HELLO",Font_16x26,ST7735_GREEN,ST7735_BLACK);
+
+
   while (true) {
-    clrLED();
-    chThdSleepMilliseconds(300);
-    setLED();
+    //clrLED();
+    //chThdSleepMilliseconds(300);
     //chThdSleepMilliseconds(700);
     //test_tft();
-    ST7735_FillScreen(ST7735_BLUE);
-    chThdSleepMilliseconds(700);
+    //ST7735_FillScreen(ST7735_BLACK);
+    //toggleLED();
+    //chThdSleepMilliseconds(1000);
+    //ST7735_FillScreen(ST7735_BLUE);
+    //toggleLED();
+    //chThdSleepMilliseconds(1000);
+    //ST7735_FillScreen(ST7735_RED);
+    //toggleLED();
+    //chThdSleepMilliseconds(1000);
+    //ST7735_FillScreen(ST7735_GREEN);
+    //toggleLED();
+    //chThdSleepMilliseconds(1000);
+    //ST7735_FillScreen(ST7735_CYAN);
+    //toggleLED();
+    //chThdSleepMilliseconds(1000);
+    //ST7735_FillScreen(ST7735_MAGENTA);
+    //toggleLED();
+    //chThdSleepMilliseconds(1000);
+    //ST7735_FillScreen(ST7735_YELLOW);
+    //toggleLED();
+    //chThdSleepMilliseconds(1000);
+    //ST7735_FillScreen(ST7735_WHITE);
+    toggleLED();
+    chThdSleepMilliseconds(500);
+
   }
 }
 
@@ -60,6 +88,7 @@ int main(void) {
 
   /*  */
   ST7735_Init();
+  tft_Led(LED_FULL);
 
   /*
    * Activates the USB driver and then the USB bus pull-up on D+.

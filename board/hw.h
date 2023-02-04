@@ -40,6 +40,9 @@
 #define ST7735_DC_Pin        10U
 #define ST7735_DC_GPIO_Port  GPIOB
 
+#define ST7735_LED_Pin       1U
+#define ST7735_LED_PORT      GPIOB
+
 #define PORT_SPI1_SCK       GPIOA
 #define PORT_SPI1_MISO      GPIOA
 #define PORT_SPI1_MOSI      GPIOA
@@ -55,9 +58,13 @@ void tft_spi_csh(void);
 void tft_spi_csl(void);
 void tft_reset(void);
 void tft_spi_xfer_byte(unsigned char *data, unsigned char len);
+void tft_spiSend(const void *txbuf, size_t n);
 void tft_setData(void);
 void tft_setCmd(void);
 
+#define LED_FULL    100U
+#define LED_OFF     0U
+void tft_Led(uint8_t val);
 
 
 /* LED */
@@ -65,6 +72,7 @@ void tft_setCmd(void);
 void initLED(void);
 void setLED(void);
 void clrLED(void);
+void toggleLED(void);
 
 
 #endif
