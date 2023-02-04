@@ -12,7 +12,6 @@
 #include "st7735.h"
 #include "fonts.h"
 
-
 #define SHELL_WA_SIZE   THD_WORKING_AREA_SIZE(2048)
 
 void test_tft(void);
@@ -24,11 +23,11 @@ void test_tft(void);
 static THD_WORKING_AREA(waThread1, 128);
 static THD_FUNCTION(Thread1, arg) {
 
+  
   (void)arg;
   chRegSetThreadName("blinker");
   setLED();
 
-  ST7735_FillScreen(ST7735_BLACK);
   ST7735_WriteString(0,0,"HELLO",Font_16x26,ST7735_GREEN,ST7735_BLACK);
 
 
@@ -36,29 +35,29 @@ static THD_FUNCTION(Thread1, arg) {
     //clrLED();
     //chThdSleepMilliseconds(300);
     //chThdSleepMilliseconds(700);
-    //test_tft();
-    //ST7735_FillScreen(ST7735_BLACK);
-    //toggleLED();
-    //chThdSleepMilliseconds(1000);
-    //ST7735_FillScreen(ST7735_BLUE);
-    //toggleLED();
-    //chThdSleepMilliseconds(1000);
-    //ST7735_FillScreen(ST7735_RED);
-    //toggleLED();
-    //chThdSleepMilliseconds(1000);
-    //ST7735_FillScreen(ST7735_GREEN);
-    //toggleLED();
-    //chThdSleepMilliseconds(1000);
-    //ST7735_FillScreen(ST7735_CYAN);
-    //toggleLED();
-    //chThdSleepMilliseconds(1000);
-    //ST7735_FillScreen(ST7735_MAGENTA);
-    //toggleLED();
-    //chThdSleepMilliseconds(1000);
-    //ST7735_FillScreen(ST7735_YELLOW);
-    //toggleLED();
-    //chThdSleepMilliseconds(1000);
-    //ST7735_FillScreen(ST7735_WHITE);
+    test_tft();
+    ST7735_FillScreen(ST7735_BLACK);
+    toggleLED();
+    chThdSleepMilliseconds(1000);
+    ST7735_FillScreen(ST7735_BLUE);
+    toggleLED();
+    chThdSleepMilliseconds(1000);
+    ST7735_FillScreen(ST7735_RED);
+    toggleLED();
+    chThdSleepMilliseconds(1000);
+    ST7735_FillScreen(ST7735_GREEN);
+    toggleLED();
+    chThdSleepMilliseconds(1000);
+    ST7735_FillScreen(ST7735_CYAN);
+    toggleLED();
+    chThdSleepMilliseconds(1000);
+    ST7735_FillScreen(ST7735_MAGENTA);
+    toggleLED();
+    chThdSleepMilliseconds(1000);
+    ST7735_FillScreen(ST7735_YELLOW);
+    toggleLED();
+    chThdSleepMilliseconds(1000);
+    ST7735_FillScreen(ST7735_WHITE);
     toggleLED();
     chThdSleepMilliseconds(500);
 
@@ -90,6 +89,8 @@ int main(void) {
   ST7735_Init();
   tft_Led(LED_FULL);
 
+  //ST7735_FillScreenFast(ST7735_BLACK);
+
   /*
    * Activates the USB driver and then the USB bus pull-up on D+.
    * Note, a delay is inserted in order to not have to disconnect the cable
@@ -103,7 +104,7 @@ int main(void) {
   /*
    * Creates the blinker thread.
    */
-  chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
+  chThdCreateStatic(waThread1, sizeof(waThread1), HIGHPRIO, Thread1, NULL);
 
   /*
    * Normal main() thread activity, in this demo it does nothing except
@@ -133,7 +134,7 @@ void test_tft(void) {
     }
 
     chThdSleepMilliseconds(100);
-#ifdef ALL
+
     // Check fonts
     ST7735_FillScreen(ST7735_BLACK);
     ST7735_WriteString(0, 0, "Font_7x10, red on black, lorem ipsum dolor sit amet", Font_7x10, ST7735_RED, ST7735_BLACK);
@@ -173,5 +174,5 @@ void test_tft(void) {
     ST7735_FillScreen(ST7735_WHITE);
     ST7735_WriteString(0, 0, "WHITE", Font_11x18, ST7735_BLACK, ST7735_WHITE);
     chThdSleepMilliseconds(500);
-#endif    
+
 }

@@ -59,26 +59,28 @@ void tft_reset(void)
 }
 void tft_spi_xfer_byte(unsigned char *data, unsigned char len)
 {
+  uint16_t i; 
   spiStartSend(&SPID1, len, data);
-  chThdSleepMicroseconds(1);
+  for (i=0;i<300;i++) { asm("NOP");}
+
 }
 
 void tft_spiSend(const void *txbuf, size_t n)
 {
   spiStartSend(&SPID1, n, txbuf);
-  chThdSleepMicroseconds(1);  
+  //chThdSleepMicroseconds(1);  
 }
 
 void tft_setData(void) 
 {
     palSetPad(ST7735_DC_GPIO_Port, ST7735_DC_Pin);
-    chThdSleepMicroseconds(1);
+    //chThdSleepMicroseconds(1);
 }
 
 void tft_setCmd(void)
 {
     palClearPad(ST7735_DC_GPIO_Port, ST7735_DC_Pin);
-    chThdSleepMicroseconds(1);
+    //chThdSleepMicroseconds(1);
 }
 
 void tft_Led(uint8_t val)
