@@ -53,6 +53,12 @@
 #define PIN_SPI1_MOSI       7U
 #define PIN_SPI1_CS         4U
 
+#define PORT_CAN_TX         GPIOB
+#define PORT_CAN_RX         GPIOB
+
+#define PIN_CAN_RX          8U
+#define PIN_CAN_TX          9U
+
 void initTFTSPI(void);
 void tft_spi_csh(void);
 void tft_spi_csl(void);
@@ -74,5 +80,7 @@ void setLED(void);
 void clrLED(void);
 void toggleLED(void);
 
+/* CAN */
+void initCANPins(void);
 
 #endif

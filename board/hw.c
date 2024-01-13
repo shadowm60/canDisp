@@ -120,3 +120,9 @@ void toggleLED(void)
 {
   palTogglePad(GPIO_LED, GPIOPin_LED);
 }
+
+void initCANPins(void)
+{
+  palSetPadMode(PORT_CAN_TX, PIN_CAN_TX, PAL_MODE_STM32_ALTERNATE_PUSHPULL);     /* CAN_TX */
+  palSetPadMode(PORT_CAN_RX, PIN_CAN_RX, PAL_MODE_STM32_ALTERNATE_PUSHPULL);     /* CAN_RX */  
+}
